@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xbox Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: transparent;
+            padding: 0 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gamertag-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b35, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .gamertag-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .gamertag {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .gamerscore-line {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #ffffff;
+        }
+
+        .gamerscore-icon {
+            width: 12px;
+            height: 12px;
+            background: #107C10;
+            border-radius: 2px;
+        }
+
+        .time {
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        /* Main Content */
+        .main-content {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Image Display Area - Hidden */
+        .image-display {
+            display: none;
+        }
+
+        /* Cards Container */
+        .cards-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px 80px;
+            background: transparent;
+            flex-shrink: 0;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: #107C10;
+            box-shadow: 0 15px 30px rgba(16, 124, 16, 0.3);
+        }
+
+        .card.active {
+            border-color: #107C10;
+            box-shadow: 0 0 20px rgba(16, 124, 16, 0.5);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .card-image {
+            transform: scale(1.1);
+        }
+
+        .card-content {
+            padding: 12px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #ffffff;
+        }
+
+        .card-description {
+            font-size: 12px;
+            color: #cccccc;
+            line-height: 1.4;
+        }
+
+        /* Game Cover Gradients */
+        .starfield-cover { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+        .fortnite-cover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .diablo-cover { background: linear-gradient(135deg, #2c1810 0%, #8b0000 100%); }
+        .forza-cover { background: linear-gradient(135deg, #ff4500 0%, #ffd700 100%); }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                top: 40px;
+                padding: 0 40px;
+            }
+
+            .gamertag {
+                font-size: 12px;
+            }
+
+            .time {
+                font-size: 14px;
+            }
+
+            .profile-circle {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .gamerscore-line {
+                font-size: 10px;
+            }
+
+            .gamerscore-icon {
+                width: 10px;
+                height: 10px;
+            }
+
+            .cards-container {
+                padding: 12px 40px;
+            }
+
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .card-image {
+                height: 60px;
+            }
+
+            .card-content {
+                padding: 8px;
+            }
+
+            .card-title {
+                font-size: 12px;
+            }
+
+            .card-description {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Loading Animation */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Focus styles for accessibility */
+        .card:focus {
+            outline: 2px solid #107C10;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="gamertag-section">
+            <div class="profile-circle">LW</div>
+            <div class="gamertag-info">
+                <div class="gamertag">Luke Woods</div>
+                <div class="gamerscore-line">
+                    <div class="gamerscore-icon"></div>
+                    <span>21,337</span>
+                </div>
+            </div>
+        </div>
+        <div class="time" id="current-time">04:55 pm</div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Cards Container -->
+        <section class="cards-container">
+            <div class="cards-grid">
+                <div class="card active" tabindex="0" data-game="starfield">
+                    <div class="card-image starfield-cover"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Starfield</h3>
+                        <p class="card-description">Epic space adventure</p>
+                    </div>
+                </div>
+
+                <div class="card" tabindex="0" data-game="fortnite">
+                    <div class="card-image fortnite-cover"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Fortnite</h3>
+                        <p class="card-description">Battle royale action</p>
+                    </div>
+                </div>
+
+                <div class="card" tabindex="0" data-game="diablo">
+                    <div class="card-image diablo-cover"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Diablo IV</h3>
+                        <p class="card-description">Dark fantasy RPG</p>
+                    </div>
+                </div>
+
+                <div class="card" tabindex="0" data-game="forza">
+                    <div class="card-image forza-cover"></div>
+                    <div class="card-content">
+                        <h3 class="card-title">Forza Motorsport</h3>
+                        <p class="card-description">Racing simulation</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Game data
+        const games = {
+            starfield: {
+                title: "Starfield",
+                description: "Explore the galaxy in this epic space adventure. Discover new worlds, build your character, and uncover the mysteries of the universe.",
+                image: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'><rect width='800' height='400' fill='%231a1a2e'/><text x='400' y='200' text-anchor='middle' fill='white' font-size='48' font-family='Arial'>Starfield</text></svg>",
+                background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)"
+            },
+            fortnite: {
+                title: "Fortnite",
+                description: "Jump into the ultimate battle royale experience. Build, fight, and survive in this fast-paced multiplayer game.",
+                image: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'><rect width='800' height='400' fill='%23667eea'/><text x='400' y='200' text-anchor='middle' fill='white' font-size='48' font-family='Arial'>Fortnite</text></svg>",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+            },
+            diablo: {
+                title: "Diablo IV",
+                description: "Return to the dark world of Sanctuary. Battle demons, collect loot, and master the art of combat in this action RPG.",
+                image: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'><rect width='800' height='400' fill='%232c1810'/><text x='400' y='200' text-anchor='middle' fill='white' font-size='48' font-family='Arial'>Diablo IV</text></svg>",
+                background: "linear-gradient(135deg, #2c1810 0%, #8b0000 100%)"
+            },
+            forza: {
+                title: "Forza Motorsport",
+                description: "Experience the ultimate racing simulation. Drive the world's most exotic cars on legendary tracks with realistic physics.",
+                image: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'><rect width='800' height='400' fill='%23ff4500'/><text x='400' y='200' text-anchor='middle' fill='white' font-size='48' font-family='Arial'>Forza Motorsport</text></svg>",
+                background: "linear-gradient(135deg, #ff4500 0%, #ffd700 100%)"
+            }
+        };
+
+        // Live clock update
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            }).toLowerCase();
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        // Update time immediately and then every minute
+        updateTime();
+        setInterval(updateTime, 60000);
+
+        // Card click functionality
+        const cards = document.querySelectorAll('.card');
+
+        function switchGame(gameKey) {
+            const game = games[gameKey];
+            if (!game) return;
+
+            // Update entire site background
+            document.body.style.background = game.background;
+
+            // Update active card
+            cards.forEach(card => {
+                card.classList.remove('active');
+                if (card.dataset.game === gameKey) {
+                    card.classList.add('active');
+                }
+            });
+        }
+
+        // Add click event listeners to cards
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const gameKey = card.dataset.game;
+                switchGame(gameKey);
+            });
+
+            // Add keyboard support
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const gameKey = card.dataset.game;
+                    switchGame(gameKey);
+                }
+            });
+        });
+
+
+        // Initialize with first game
+        switchGame('starfield');
+    </script>
+</body>
+</html>
